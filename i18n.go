@@ -23,10 +23,15 @@ type LanguageExtractor func(LanguageExtractorOptions, buffalo.Context) []string
 // LanguageExtractorOptions is a map of options for a LanguageExtractor.
 type LanguageExtractorOptions map[string]interface{}
 
+type packrBox interface {
+	Walk(packr.WalkFunc) error
+	MustBytes(string) ([]byte, error)
+}
+
 // Translator for handling all your i18n needs.
 type Translator struct {
 	// Box - where are the files?
-	Box packr.Box
+	Box packrBox
 	// DefaultLanguage - default is passed as a parameter on New.
 	DefaultLanguage string
 	// HelperName - name of the view helper. default is "t"
@@ -66,7 +71,7 @@ func (t *Translator) AddTranslation(lang *language.Language, translations ...tra
 // New Translator. Requires a packr.Box that points to the location
 // of the translation files, as well as a default language. This will
 // also call t.Load() and load the translations from disk.
-func New(box packr.Box, language string) (*Translator, error) {
+func New(box packrBox, language string) (*Translator, error) {
 	t := &Translator{
 		Box:             box,
 		DefaultLanguage: language,
