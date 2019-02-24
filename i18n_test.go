@@ -105,7 +105,7 @@ func Test_i18n_plural(t *testing.T) {
 
 	w := httptest.New(app())
 	res := w.HTML("/plural").Get()
-	r.Equal("Hello, alone!\nHello, 5 people!", strings.TrimSpace(res.Body.String()))
+	r.True(eq("Hello, alone!\nHello, 5 people!", strings.TrimSpace(res.Body.String())))
 }
 
 func Test_i18n_plural_fr(t *testing.T) {
@@ -116,7 +116,7 @@ func Test_i18n_plural_fr(t *testing.T) {
 	// Set language as "french"
 	req.Headers["Accept-Language"] = "fr-fr"
 	res := req.Get()
-	r.Equal("Bonjour, tout seul !\nBonjour, 5 personnes !", strings.TrimSpace(res.Body.String()))
+	r.True(eq("Bonjour, tout seul !\nBonjour, 5 personnes !", strings.TrimSpace(res.Body.String())))
 }
 
 func Test_i18n_format(t *testing.T) {
@@ -124,7 +124,7 @@ func Test_i18n_format(t *testing.T) {
 
 	w := httptest.New(app())
 	res := w.HTML("/format").Get()
-	r.Equal("Hello Mark!\n\n\t* Mr. Mark Bates\n\n\t* Mr. Chuck Berry\n", res.Body.String())
+	r.True(eq("Hello Mark!\n\n\t* Mr. Mark Bates\n\n\t* Mr. Chuck Berry\n", res.Body.String()))
 }
 
 func Test_i18n_format_fr(t *testing.T) {
@@ -135,7 +135,7 @@ func Test_i18n_format_fr(t *testing.T) {
 	// Set language as "french"
 	req.Headers["Accept-Language"] = "fr-fr"
 	res := req.Get()
-	r.Equal("Bonjour Mark !\n\n\t* M. Mark Bates\n\n\t* M. Chuck Berry\n", res.Body.String())
+	r.True(eq("Bonjour Mark !\n\n\t* M. Mark Bates\n\n\t* M. Chuck Berry\n", res.Body.String()))
 }
 
 func Test_i18n_Localized_View(t *testing.T) {
@@ -201,4 +201,13 @@ func Test_Refresh(t *testing.T) {
 	req := w.HTML("/refresh")
 	res := req.Get()
 	r.Equal("success: Language changed!#success: Langue modifiée !#", strings.TrimSpace(res.Body.String()))
+}
+
+func eq(a, b string) bool {
+	clean := func(s string) string {
+		s = strings.TrimSpace(strings.Replace(s, "\n", "", -1))
+		s = strings.Replace(s, "\r", "", -1)
+		return s
+	}
+	return clean(a) == clean(b)
 }
