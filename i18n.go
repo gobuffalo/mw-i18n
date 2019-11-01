@@ -155,6 +155,8 @@ func (t *Translator) Translate(c buffalo.Context, translationID string, args ...
 	return T(translationID, args...)
 }
 
+// TranslateWithLang returns the translation of the string identified by translationID, for the given language.
+// See Translate for further details.
 func (t *Translator) TranslateWithLang(lang string, translationID string, args ...interface{}) (string, error) {
 	T, err := i18n.Tfunc(lang)
 	if err != nil {
