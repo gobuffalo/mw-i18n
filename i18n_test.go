@@ -217,6 +217,53 @@ func Test_i18n_URL_prefix(t *testing.T) {
 	r.Equal("Hello, World!", strings.TrimSpace(res.Body.String()))
 }
 
+
+func Test_i18n_TranslateWithLang(t *testing.T) {
+	r := require.New(t)
+
+	_ = httptest.New(app())
+	transl := i18n.Translator{}
+
+	// Test English
+	lang := "en"
+	original := "greeting"
+	want := "Hello, World!"
+	res, err := transl.TranslateWithLang(lang, original)
+	r.NoError(err)
+	r.Equal(want, res)
+
+	// Test French
+	lang = "fr-fr"
+	want = "Bonjour à tous !"
+	res, err = transl.TranslateWithLang(lang, original)
+	r.NoError(err)
+	r.Equal(want, res)
+
+	// Test French singular
+	original = "greeting-plural"
+	want = "Bonjour, tout seul !"
+	count := 1
+	res, err = transl.TranslateWithLang(lang, original, count)
+	r.NoError(err)
+	r.Equal(want, res)
+
+	// Test French plural
+	want = "Bonjour, 5 personnes !"
+	count = 5
+	res, err = transl.TranslateWithLang(lang, original, count)
+	r.NoError(err)
+	r.Equal(want, res)
+
+	// Test French format-loop
+	original = "test-format-loop"
+	want = "M. Mark Bates"
+	params := struct{FirstName, LastName string}{"Mark", "Bates"}
+	res, err = transl.TranslateWithLang(lang, original, params)
+	r.NoError(err)
+	r.Equal(want, res)
+}
+
+
 func Test_Refresh(t *testing.T) {
 	r := require.New(t)
 
