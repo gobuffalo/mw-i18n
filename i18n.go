@@ -11,7 +11,6 @@ import (
 	"github.com/nicksnyder/go-i18n/i18n"
 	"github.com/nicksnyder/go-i18n/i18n/language"
 	"github.com/nicksnyder/go-i18n/i18n/translation"
-	"github.com/pkg/errors"
 )
 
 // LanguageExtractor can be implemented for custom finding of search
@@ -42,7 +41,7 @@ func (t *Translator) Load() error {
 	return t.Box.Walk(func(path string, f packd.File) error {
 		b, err := t.Box.Find(path)
 		if err != nil {
-			return errors.Wrapf(err, "unable to read locale file %s", path)
+			return fmt.Errorf("unable to read locale file %s: %v", path, err)
 		}
 
 		base := filepath.Base(path)
@@ -51,7 +50,7 @@ func (t *Translator) Load() error {
 		// Add a prefix to the loaded string, to avoid collision with an ISO lang code
 		err = i18n.ParseTranslationFileBytes(fmt.Sprintf("%sbuff%s", dir, base), b)
 		if err != nil {
-			return errors.Wrapf(err, "unable to parse locale file %s", base)
+			return fmt.Errorf("unable to parse locale file %s: %v", base, err)
 		}
 		return nil
 	})
@@ -154,6 +153,16 @@ func (t *Translator) Middleware() buffalo.MiddlewareFunc {
 func (t *Translator) Translate(c buffalo.Context, translationID string, args ...interface{}) string {
 	T := c.Value("T").(i18n.TranslateFunc)
 	return T(translationID, args...)
+}
+
+// TranslateWithLang returns the translation of the string identified by translationID, for the given language.
+// See Translate for further details.
+func (t *Translator) TranslateWithLang(lang, translationID string, args ...interface{}) (string, error) {
+	T, err := i18n.Tfunc(lang)
+	if err != nil {
+		return "", err
+	}
+	return T(translationID, args...), nil
 }
 
 // AvailableLanguages gets the list of languages provided by the app.

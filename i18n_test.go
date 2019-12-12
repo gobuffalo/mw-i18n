@@ -1,8 +1,11 @@
 package i18n_test
 
 import (
-	"github.com/gobuffalo/packr/v2"
+	"github.com/gobuffalo/packd"
+	"io/ioutil"
 	"log"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -19,15 +22,35 @@ type User struct {
 	LastName  string
 }
 
+// makeBox builds an in-memory box for tests.
+// This allows to drop the hard dependency on packr.
+func makeBox(boxPath string) packd.Box {
+	box := packd.NewMemoryBox()
+	err := filepath.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+		content, err := ioutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		return box.AddBytes(filepath.Base(path), content)
+	})
+	if err != nil {
+		panic(err)
+	}
+	return box
+}
+
 func app() *buffalo.App {
 	app := buffalo.New(buffalo.Options{})
 
 	r := render.New(render.Options{
-		TemplatesBox: packr.New("./templates", "./templates"),
+		TemplatesBox: makeBox("./templates"),
 	})
 
 	// Setup and use translations:
-	t, err := i18n.New(packr.New("./locales", "./locales"), "en-US")
+	t, err := i18n.New(makeBox("./locales"), "en-US")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -193,6 +216,53 @@ func Test_i18n_URL_prefix(t *testing.T) {
 	res = req.Get()
 	r.Equal("Hello, World!", strings.TrimSpace(res.Body.String()))
 }
+
+
+func Test_i18n_TranslateWithLang(t *testing.T) {
+	r := require.New(t)
+
+	_ = httptest.New(app())
+	transl := i18n.Translator{}
+
+	// Test English
+	lang := "en"
+	original := "greeting"
+	want := "Hello, World!"
+	res, err := transl.TranslateWithLang(lang, original)
+	r.NoError(err)
+	r.Equal(want, res)
+
+	// Test French
+	lang = "fr-fr"
+	want = "Bonjour à tous !"
+	res, err = transl.TranslateWithLang(lang, original)
+	r.NoError(err)
+	r.Equal(want, res)
+
+	// Test French singular
+	original = "greeting-plural"
+	want = "Bonjour, tout seul !"
+	count := 1
+	res, err = transl.TranslateWithLang(lang, original, count)
+	r.NoError(err)
+	r.Equal(want, res)
+
+	// Test French plural
+	want = "Bonjour, 5 personnes !"
+	count = 5
+	res, err = transl.TranslateWithLang(lang, original, count)
+	r.NoError(err)
+	r.Equal(want, res)
+
+	// Test French format-loop
+	original = "test-format-loop"
+	want = "M. Mark Bates"
+	params := struct{FirstName, LastName string}{"Mark", "Bates"}
+	res, err = transl.TranslateWithLang(lang, original, params)
+	r.NoError(err)
+	r.Equal(want, res)
+}
+
 
 func Test_Refresh(t *testing.T) {
 	r := require.New(t)
