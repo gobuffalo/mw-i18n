@@ -1,6 +1,7 @@
 package i18n_test
 
 import (
+	"github.com/gobuffalo/packr/v2"
 	"log"
 	"strings"
 	"testing"
@@ -10,7 +11,6 @@ import (
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gobuffalo/httptest"
 	"github.com/gobuffalo/mw-i18n"
-	"github.com/gobuffalo/packr"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,11 +23,11 @@ func app() *buffalo.App {
 	app := buffalo.New(buffalo.Options{})
 
 	r := render.New(render.Options{
-		TemplatesBox: packr.NewBox("./templates"),
+		TemplatesBox: packr.New("./templates", "./templates"),
 	})
 
 	// Setup and use translations:
-	t, err := i18n.New(packr.NewBox("./locales"), "en-US")
+	t, err := i18n.New(packr.New("./locales", "./locales"), "en-US")
 	if err != nil {
 		log.Fatal(err)
 	}
