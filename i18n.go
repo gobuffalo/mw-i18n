@@ -7,10 +7,10 @@ import (
 	"strings"
 
 	"github.com/gobuffalo/buffalo"
+	"github.com/gobuffalo/mw-i18n/internal/go-i18n/i18n"
+	"github.com/gobuffalo/mw-i18n/internal/go-i18n/i18n/language"
+	"github.com/gobuffalo/mw-i18n/internal/go-i18n/i18n/translation"
 	"github.com/gobuffalo/packd"
-	"github.com/nicksnyder/go-i18n/i18n"
-	"github.com/nicksnyder/go-i18n/i18n/language"
-	"github.com/nicksnyder/go-i18n/i18n/translation"
 )
 
 // LanguageExtractor can be implemented for custom finding of search
@@ -133,7 +133,7 @@ func (t *Translator) Middleware() buffalo.MiddlewareFunc {
 
 // Translate returns the translation of the string identified by translationID.
 //
-// See https://github.com/nicksnyder/go-i18n
+// See https://github.com/gobuffalo/i18n-mw/internal/go-i18n
 //
 // If there is no translation for translationID, then the translationID itself is returned.
 // This makes it easy to identify missing translations in your app.

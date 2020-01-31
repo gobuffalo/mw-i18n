@@ -1,7 +1,6 @@
 package i18n_test
 
 import (
-	"github.com/gobuffalo/packd"
 	"io/ioutil"
 	"log"
 	"os"
@@ -10,10 +9,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gobuffalo/packd"
+
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gobuffalo/httptest"
-	"github.com/gobuffalo/mw-i18n"
+	i18n "github.com/gobuffalo/mw-i18n"
 	"github.com/stretchr/testify/require"
 )
 
@@ -217,7 +218,6 @@ func Test_i18n_URL_prefix(t *testing.T) {
 	r.Equal("Hello, World!", strings.TrimSpace(res.Body.String()))
 }
 
-
 func Test_i18n_TranslateWithLang(t *testing.T) {
 	r := require.New(t)
 
@@ -257,12 +257,11 @@ func Test_i18n_TranslateWithLang(t *testing.T) {
 	// Test French format-loop
 	original = "test-format-loop"
 	want = "M. Mark Bates"
-	params := struct{FirstName, LastName string}{"Mark", "Bates"}
+	params := struct{ FirstName, LastName string }{"Mark", "Bates"}
 	res, err = transl.TranslateWithLang(lang, original, params)
 	r.NoError(err)
 	r.Equal(want, res)
 }
-
 
 func Test_Refresh(t *testing.T) {
 	r := require.New(t)
