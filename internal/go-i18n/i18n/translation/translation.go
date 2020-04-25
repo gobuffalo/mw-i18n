@@ -3,6 +3,7 @@ package translation
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/gobuffalo/mw-i18n/internal/go-i18n/i18n/language"
 )
@@ -45,7 +46,7 @@ func NewTranslation(data map[string]interface{}) (Translation, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &singleTranslation{id, tmpl}, nil
+		return &singleTranslation{id, tmpl, sync.RWMutex{}}, nil
 	case map[interface{}]interface{}:
 		// The YAML parser uses interface{} keys so we first convert them to string keys.
 		pluralObject = make(map[string]interface{})
