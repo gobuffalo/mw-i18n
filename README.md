@@ -27,7 +27,7 @@ func App() *buffalo.App {
 
         // Setup and use translations:
         var err error
-        if T, err = i18n.New(packr.NewBox("../locales"), "en"); err != nil {
+        if T, err = i18n.New(os.DirFS("locales"), "en"); err != nil {
             app.Stop(err)
         }
         
