@@ -9,12 +9,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gobuffalo/packd"
-
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gobuffalo/httptest"
-	i18n "github.com/gobuffalo/mw-i18n"
+	i18n "github.com/gobuffalo/mw-i18n/v2"
+	"github.com/gobuffalo/packd"
 	"github.com/stretchr/testify/require"
 )
 
@@ -51,7 +50,7 @@ func app() *buffalo.App {
 	})
 
 	// Setup and use translations:
-	t, err := i18n.New(makeBox("./locales"), "en-US")
+	t, err := i18n.New(os.DirFS("./locales"), "en-US")
 	if err != nil {
 		log.Fatal(err)
 	}
