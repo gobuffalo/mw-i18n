@@ -2,15 +2,15 @@ package i18n
 
 import (
 	"fmt"
+	"io/fs"
 	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/gobuffalo/buffalo"
-	"github.com/gobuffalo/mw-i18n/internal/go-i18n/i18n"
-	"github.com/gobuffalo/mw-i18n/internal/go-i18n/i18n/language"
-	"github.com/gobuffalo/mw-i18n/internal/go-i18n/i18n/translation"
-	"github.com/gobuffalo/packd"
+	"github.com/nicksnyder/go-i18n/i18n"
+	"github.com/nicksnyder/go-i18n/i18n/language"
+	"github.com/nicksnyder/go-i18n/i18n/translation"
 )
 
 // LanguageExtractor can be implemented for custom finding of search
@@ -24,8 +24,8 @@ type LanguageExtractorOptions map[string]interface{}
 
 // Translator for handling all your i18n needs.
 type Translator struct {
-	// Box - where are the files?
-	Box packd.Box
+	// FS that contains the files
+	FS fs.FS
 	// DefaultLanguage - default is passed as a parameter on New.
 	DefaultLanguage string
 	// HelperName - name of the view helper. default is "t"
@@ -36,10 +36,18 @@ type Translator struct {
 	LanguageExtractorOptions LanguageExtractorOptions
 }
 
-// Load translations from the t.Box.
+// Load translations from the t.FS
 func (t *Translator) Load() error {
-	return t.Box.Walk(func(path string, f packd.File) error {
-		b, err := t.Box.Find(path)
+	return fs.WalkDir(t.FS, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if d.IsDir() {
+			return nil
+		}
+
+		b, err := fs.ReadFile(t.FS, path)
 		if err != nil {
 			return fmt.Errorf("unable to read locale file %s: %v", path, err)
 		}
@@ -62,12 +70,12 @@ func (t *Translator) AddTranslation(lang *language.Language, translations ...tra
 	i18n.AddTranslation(lang, translations...)
 }
 
-// New Translator. Requires a packr.Box that points to the location
+// New Translator. Requires a fs.FS that points to the location
 // of the translation files, as well as a default language. This will
 // also call t.Load() and load the translations from disk.
-func New(box packd.Box, language string) (*Translator, error) {
+func New(fsys fs.FS, language string) (*Translator, error) {
 	t := &Translator{
-		Box:             box,
+		FS:              fsys,
 		DefaultLanguage: language,
 		HelperName:      "t",
 		LanguageExtractorOptions: LanguageExtractorOptions{

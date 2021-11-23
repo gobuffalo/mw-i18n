@@ -1,17 +1,17 @@
-i18n middleware
-===============
+# i18n middleware
 
 This Buffalo middleware enables i18n features in your app:
+
 * User language detection from configurable sources
 * Translation helper using locales bundles from github.com/nicksnyder/go-i18n
 * Localized views
 
-Installation
-------------
+## Installation
 
 This middleware is setup by default on a new Buffalo app:
 
-**actions/app.go**
+### actions/app.go
+
 ```go
 var app *buffalo.App
 
@@ -26,11 +26,12 @@ func App() *buffalo.App {
         // [...]
 
         // Setup and use translations:
-	var err error
-	if T, err = i18n.New(packr.NewBox("../locales"), "en"); err != nil {
-		app.Stop(err)
-	}
-	app.Use(T.Middleware())
+        var err error
+        if T, err = i18n.New(os.DirFS("locales"), "en"); err != nil {
+            app.Stop(err)
+        }
+        
+        app.Use(T.Middleware())
     }
     return app
 }
@@ -38,4 +39,4 @@ func App() *buffalo.App {
 
 Use `i18n.New` to create a new instance of the translation module, then add the middleware (`T.Middleware()`) to the app to enable its features.
 
-See https://gobuffalo.io/docs/localization for further info about Buffalo translation features and configuration.
+See <https://gobuffalo.io/docs/localization> for further info about Buffalo translation features and configuration.

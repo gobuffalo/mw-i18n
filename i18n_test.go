@@ -1,20 +1,16 @@
 package i18n_test
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/gobuffalo/packd"
-
 	"github.com/gobuffalo/buffalo"
 	"github.com/gobuffalo/buffalo/render"
 	"github.com/gobuffalo/httptest"
-	i18n "github.com/gobuffalo/mw-i18n"
+	i18n "github.com/gobuffalo/mw-i18n/v2"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,35 +19,15 @@ type User struct {
 	LastName  string
 }
 
-// makeBox builds an in-memory box for tests.
-// This allows to drop the hard dependency on packr.
-func makeBox(boxPath string) packd.Box {
-	box := packd.NewMemoryBox()
-	err := filepath.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
-		if info.IsDir() {
-			return nil
-		}
-		content, err := ioutil.ReadFile(path)
-		if err != nil {
-			return err
-		}
-		return box.AddBytes(filepath.Base(path), content)
-	})
-	if err != nil {
-		panic(err)
-	}
-	return box
-}
-
 func app() *buffalo.App {
 	app := buffalo.New(buffalo.Options{})
 
 	r := render.New(render.Options{
-		TemplatesBox: makeBox("./templates"),
+		TemplatesFS: os.DirFS("templates"),
 	})
 
 	// Setup and use translations:
-	t, err := i18n.New(makeBox("./locales"), "en-US")
+	t, err := i18n.New(os.DirFS("locales"), "en-US")
 	if err != nil {
 		log.Fatal(err)
 	}
