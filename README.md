@@ -1,5 +1,8 @@
 # i18n middleware
 
+NOTE: v2.0.3 will be the last version of this module and it will be deprecated.
+Use <https://github.com/gobuffalo/middleware> instead.
+
 This Buffalo middleware enables i18n features in your app:
 
 * User language detection from configurable sources
